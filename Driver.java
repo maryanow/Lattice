@@ -1,6 +1,6 @@
 /* 
  *
- * java Program2 latticeListFilename lmScale outputDir
+ * java Driver latticeListFilename lmScale outputDir
  *
  * where the arguments are
  * 
@@ -19,7 +19,7 @@
 */
 
 
-public class Program2 {
+public class Driver {
     private static final String slash = "/"; 
 
     public static void main(String[] args) {
