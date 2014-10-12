@@ -1,20 +1,4 @@
 /* 
- * Program2.java
- *
- * The driver program for CSCI 241's Program 2
- *
- * Creates Lattice objects for each lattice in the lattice list input file
- * searches them to find and print the best hypothesis, and prints 
- * various lattice statistics
- * 
- * Do not modify this file.  
- *
- * Brian Hutchinson
- * Feb 2014
- *
- * ----------------------------------------------------------------------------
- *
- * usage:
  *
  * java Program2 latticeListFilename lmScale outputDir
  *
@@ -24,9 +8,11 @@
  *                          each line contains two strings, separated by a space
  *                          the first string is the filename for a lattice file
  *                          the second string is the filename for a ref file
+ 
  *   lmScale                a non-negative number that specifies how much to weight 
  *                          the "language model" score, relative to the 
  *                          "acoustic model" score
+ 
  *   outputDir              a directory where output lattices and dot files will
  *                          be written, one for each line in the lattice list
  *
@@ -34,7 +20,7 @@
 
 
 public class Program2 {
-    private static final String slash = "/"; // You may need to change this to "\" on Windows...
+    private static final String slash = "/"; 
 
     public static void main(String[] args) {
     
@@ -57,7 +43,6 @@ public class Program2 {
             System.exit(1);
         }
 
-        double totalWER = 0.0;
         int numFiles = 0;
         while( input.hasNext() ) {
             numFiles++;
@@ -76,16 +61,14 @@ public class Program2 {
             // Decode, print best hypothesis and various statistics
             Hypothesis hypothesis = lattice.decode(lmScale);
             System.out.println("Hypothesis: " + hypothesis.getHypothesisString());
-            double WER = hypothesis.computeWER(refFilename);
-            System.out.println("WER : " + new java.text.DecimalFormat("0.000").format(WER));
-            totalWER += WER;
             System.out.println("Number of unique paths: " + lattice.countAllPaths());
             System.out.println("Lattice density: " + new java.text.DecimalFormat("0.000").format(lattice.getLatticeDensity()));
-//            System.out.println("Topological sort: " + java.util.Arrays.toString(lattice.topologicalSort()));
             java.util.HashSet<String> words = lattice.uniqueWordsAtTime(0.5);
-            printWordSet(words,outputDir + slash + lattice.getUtteranceID() + ".wordsAtTime");
+            printWordSet(words, outputDir + slash + lattice.getUtteranceID() + ".wordsAtTime");
+            
             System.out.print("Locations of -silence-: "); 
             lattice.printSortedHits("-silence-");
+            
             System.out.print("Locations of i: "); 
             lattice.printSortedHits("i");
 
@@ -98,10 +81,6 @@ public class Program2 {
             }
             lattice.saveAsFile(latticeOutputFilename);
         }
-    
-        System.out.println("Avg WER = " + totalWER/numFiles);
-
-        return;
     }
                 
 
@@ -113,18 +92,19 @@ public class Program2 {
             System.err.println("Error: Unable to open file " + refFilename);
             System.exit(1);
         }
+        
         if( refInput.hasNext() ) {
             System.out.println("Reference: " + refInput.nextLine());
         } else {
             System.out.println("Reference: ");
         }
-        return;
     }
 
     private static void printWordSet(java.util.HashSet<String> words, String outFilename) {
-		if( words == null ) {
-			return;
-		}	
+        if (words == null) {
+	    return;
+	}	
+	
         java.io.PrintStream output = null;
         try {
             output = new java.io.PrintStream(outFilename);
@@ -132,9 +112,9 @@ public class Program2 {
             System.err.println("Error: Unable to open file " + outFilename + " for writing");
             System.exit(1);
         }
+        
         for( String w : words ) {
             output.println(w);
         }
-        return;
     }
 }
