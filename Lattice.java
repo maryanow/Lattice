@@ -2,7 +2,6 @@
  * Lattice.java
  *
  * Directed acyclic graph that represents a large space of speech recognition hypotheses.
- *
  */
 
 import java.util.*;
@@ -10,7 +9,7 @@ import java.lang.*;
 import java.io.*;
 import java.math.BigInteger;
 
-public class Lattice	{
+public class Lattice {
    private String utteranceID;      
    private int startIdx, endIdx;	 
    private int numNodes, numEdges;	  
@@ -18,15 +17,16 @@ public class Lattice	{
    private double[] nodeTimes;		 
    private BigInteger paths = new BigInteger("0");
 
-   public Lattice(String latticeFilename) {
-   
    /*
    *  Steps through first five lines for ID, START, END, NUMNODES, NUMEDGES. These will be the same for all lattice files.
+   * 
    *  Goes through the amounts of nodes for their times, adding them to the initialized array.
+   * 
    *  Initializes adjMatrix to all null values.
+   *
    *  Creates a new edge object for the rest of the lines in the file. 'i' is the source, 'j' is the destination. 'j' is adjacent to 'i'.
    */
-   
+   public Lattice(String latticeFilename) {   
       try (Scanner input = new Scanner(new File(latticeFilename))) {
          String[] line;
          int lineCount = 0;
@@ -94,15 +94,16 @@ public class Lattice	{
       return this.numEdges;
    }
 
-   public String toString() {
-   
    /*
    *  Creates strings representing the fields that will have the same format for all lattice files (ID -> START -> END -> NODES -> EDGES).
+   *  
    *  Then creates a string for all nodes with given time.  
+   * 
    *  Searches through adjMatrix for any non-null spot, adds the edge to a string.
+   *  
    *  Returns a string of all these fields together with new lines appropriately.
    */
-   
+   public String toString() {  
       String allNodes = "";
       String allEdges = "";
       String id = "id " + this.utteranceID;
@@ -126,19 +127,19 @@ public class Lattice	{
       return (id + "\n" + start + "\n" + end + "\n" + nodes + "\n" + edges + "\n" + allNodes + allEdges);
    }
    
-   // A new Hypothesis object is returned	that contains the shortest path
-   //  (most probable path) from the startIdx to the endIdx
-   public Hypothesis decode(double lmScale)	{
-   
-   /*
+   /* A new Hypothesis object is returned	that contains the shortest path
+   *   (most probable path) from the startIdx to the endIdx
+   *
    *  Initializes costs of all nodes to infinity and parents to -1.
    *  Runs through all edges in adjMatrix to check for the lowest cost of getting from startIdx to the next 
    *   node in topologically sorted order.
+   *
    *  Backtracks through endIdx and all parents until startIdx, this gives the reverse order of the path.
+   *
    *  Adds the label of each edge in the path from last to first from the reverse order, giving the correct 
    *   order of the shortest path through the lattice.
    */
-   
+   public Hypothesis decode(double lmScale)	{   
       double inf = java.lang.Double.POSITIVE_INFINITY;
       Hypothesis hypothesis = new Hypothesis();
       double[] cost = new double[this.numNodes];
@@ -178,15 +179,14 @@ public class Lattice	{
       return hypothesis;
    }
 
-   public int[] topologicalSort() {
-   
    /*
    *  Add node to the ArrayList zeroIn if in-degree equals 0. 
-   *  Until zeroIn is empty, go through every node in zeroIn, adding it to the result ("order") and  
-   *  decrementing all adjacent nodes. With this implementation, zeroIn will always take the numerically 
-   *  lowest node.
+   *
+   *  Until zeroIn is empty, go through every node in zeroIn, adding it to the result 
+   *   ("order") and decrementing all adjacent nodes. With this implementation, zeroIn 
+   *   will always take the numerically lowest node.
    */
-   
+   public int[] topologicalSort() {   
       int[] order = new int[this.numNodes];
       int[] inDegrees = new int[this.numNodes];   
       ArrayList<Integer> zeroIn = new ArrayList<Integer>();   
@@ -203,7 +203,7 @@ public class Lattice	{
          inDegrees[col] = degreeCount;
       }      
       
-      for (int i = 0; i < this.numNodes; i++) {           // zeroIn contains the node(s) that have inDegree of 0.
+      for (int i = 0; i < this.numNodes; i++) {
          if (inDegrees[i] == 0) {
             zeroIn.add(i);
          }
@@ -227,16 +227,16 @@ public class Lattice	{
       
       return order;
    }
-
-   public java.math.BigInteger countAllPaths()	{
    
    /*
-   *  The total paths in the graph is the sum of all paths to the end from all children from the start node.
-   *  The total paths from all children to the end node is the sum of all their children to the end node, and so on. 
+   *  The total paths in the graph is the sum of all paths to 
+   *   the end from all children from the start node.
+   *
+   *  The total paths from all children to the end node is the 
+   *   sum of all their children to the end node, and so on. 
    */
-      
+   public java.math.BigInteger countAllPaths()	{      
       BigInteger paths = BigInteger.ZERO;
-      BigInteger sum;
       BigInteger[] childPaths = new BigInteger[this.numNodes];
       int[] topSort = this.topologicalSort();
       
@@ -246,8 +246,6 @@ public class Lattice	{
       childPaths[this.numNodes - 1] = BigInteger.ONE;
       
       for (int i = topSort.length - 2; i >= 0; i--) {
-         sum = BigInteger.ZERO;
-         
          for (int j = 0; j < this.numNodes; j++) {         
             if (adjMatrix[topSort[i]][j] != null) {
                childPaths[topSort[i]] = childPaths[topSort[i]].add(childPaths[j]);   
@@ -259,15 +257,16 @@ public class Lattice	{
       return childPaths[startIdx];
    }
 
-   // Returns the lattice density:
-   //	(# of non -silence- words) / (# seconds from start to end index)
-   public double getLatticeDensity() {
-   
-   /* 
-   *  getLatticeDensity() checks through the adjMatrix for all non -silence- words, keeping count along the way.
-   *  Then divides the count of non -silence- words by the time between the startIdx and endIdx.
+   /* Returns the lattice density:
+   *	 (# of non -silence- words) / (# seconds from start to end index)
+   * 
+   *  Checks through the adjMatrix for all non -silence- 
+   *   words, keeping count along the way.
+   *
+   *  Then divides the count of non -silence- words by the time between the 
+   *   startIdx and endIdx.
    */
-   
+   public double getLatticeDensity() {
       double totalTime = nodeTimes[endIdx] - nodeTimes[startIdx];
       int wordCount = 0;
       
@@ -282,12 +281,11 @@ public class Lattice	{
       return (wordCount / totalTime);
    }
 
-   public void writeAsDot(String dotFilename) {
-   
    /*
-   *  Given the dot format, writes, to the given file, the header followed by every edge's source node, destination node, and label.
+   *  Given the dot format, writes, to the given file, the header 
+   *   followed by every edge's source node, destination node, and label.
    */
-   
+   public void writeAsDot(String dotFilename) {   
       try {
          PrintWriter writer = new PrintWriter(dotFilename);
          writer.print("digraph g {\n\trankdir=\"LR\"\n"); 
@@ -309,12 +307,11 @@ public class Lattice	{
       
    }
 
-   public void saveAsFile(String latticeOutputFilename) {
-   
    /*
-   *  Writes the lattice, in the original format implemented through this.toString(), to the given file.
+   *  Writes the lattice, in the original format implemented through 
+   *   this.toString(), to the given file.
    */
-   
+   public void saveAsFile(String latticeOutputFilename) {   
       try {
          PrintWriter writer = new PrintWriter(latticeOutputFilename);
          
@@ -327,14 +324,16 @@ public class Lattice	{
         
    }
 
-   public java.util.HashSet<String> uniqueWordsAtTime(double time) { 
-   
    /*
    *  Creates an empty HashSet in the case that no words are found for the time.
-   *  Goes through every edge checking to see if the time parameter is between the source node and the destination node, inclusive to both.
-   *  Adds the edge's label to the HashSet, automatically doesn't include more than one instance of a word.
-   */
    
+   *  Goes through every edge checking to see if the time parameter is between 
+   *   the source node and the destination node, inclusive to both.
+   
+   *  Adds the edge's label to the HashSet, automatically doesn't include more than 
+   *   one instance of a word.
+   */
+   public java.util.HashSet<String> uniqueWordsAtTime(double time) {    
       HashSet<String> wordSet = new HashSet<String>(0);
       
       for (int row = 0; row < this.numNodes; row++) {
@@ -351,13 +350,13 @@ public class Lattice	{
       return wordSet;
    }
 
-   public void printSortedHits(String word)	{
-   
    /*
-   *  Finds all times that a word appears, then gets the midpoint between the two connecting nodes for the edge.
+   *  Finds all times that a word appears, then gets the midpoint 
+   *   between the two connecting nodes for the edge.
+   *
    *  Sorts the array of hits and prints their times.
    */
-   
+   public void printSortedHits(String word)	{   
       ArrayList<Double> hits = new ArrayList<Double>(); 
       double[] sortedHits;
       
