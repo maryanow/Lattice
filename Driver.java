@@ -1,7 +1,6 @@
 /* 
- * java Driver latticeListFilename lmScale outputDir
- *
- * where the arguments are
+ * Usage 
+ *    java Driver latticeListFilename lmScale outputDir
  * 
  *   latticeListFilename    a plaintext file with one line per lattice
  *                          each line contains two strings, separated by a space
